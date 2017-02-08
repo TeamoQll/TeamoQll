@@ -107,7 +107,7 @@
  				roleId = #{roleId},
  			</if>
  		</trim>
- 		where id = #{id}hhhhh
+ 		where id = #{id}
  	</update>
  	
 <!-- foreach(循环array参数) -->
