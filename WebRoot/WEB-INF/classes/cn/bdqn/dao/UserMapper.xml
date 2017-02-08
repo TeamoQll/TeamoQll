@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<!-- namespace的名字需要跟接口名一致 -->
+<mapper namespace="cn.bdqn.dao.UserMapper">
+	<!-- 根据roleId获取用户列表：当数据库中的字段信息与对象打的属性不一致时需要通过resultMap来映射 -->
+	<resultMap type="Role" id="roleMap">
+		<result property="id" column="id"/>
+		<result property="roleCode" column="roleCode"/>
+		<result property="roleName" column="roleName"/>
+	</resultMap>
+
+
+  <!-- 根据roleId获取用户列表association 多对一 -->
+  <resultMap type="User" id="seachUserResult">
+  	<result property="id" column="id"/>
+  	<result property="userCode" column="userCode"/>
+  	<result property="userName" column="userName"/>
+  	<result property="roleId" column="roleId"/>
+  	<association property="role" javaType="Role" resultMap="roleMap"></association>
+  </resultMap>
+  
+  <select id="getUserListByRoleId" parameterType="Role" resultMap="seachUserResult">
+  	select u.*,r.roleName as roleName,r.roleCode as roleCode
+  		from user u,role r
+  		where u.roleId = r.id
+  		and u.roleId = #{id}
+  </select>
+  
+  <!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ -->
+  
+  <!-- 获取指定用户的地址列表(user表-address表：1对多关系) -->
+  <resultMap type="User" id="userMap">
+  <id property="id" column="userId"/> <!-- 1对多：有主外键关系的时候 就把外键单独拿出来-->
+  <result property="userName" column="userName"/>
+  
+  <collection property="addressList" ofType="Address">
+  	<id property="id" column="a_id"/>
+  	<result property="postCode" column="postCode"/>
+  	<result property="addressContent" column="addressContent"/>
+  </collection>
+  </resultMap>
+  <select id="getAddressListByUserId" parameterType="User" resultMap="userMap">
+  	select *,a.id as a_id
+  		from user u,address a
+  			where u.id = a.userId
+  			and u.id=#{id}
+  </select>
+  
+ <!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ --> 
+  <!-- 动态SQL -->
+  <resultMap type="User" id="seachUserResult2">
+  	<result property="id" column="id"/>
+  	<result property="userCode" column="userCode"/>
+  	<result property="userName" column="userName"/>
+  	<result property="roleId" column="roleId"/>
+  	<result property="roleName" column="roleName"/>
+  </resultMap>
+<!-- if -->
+  <select id="searchUserList" parameterType="User" resultMap="seachUserResult2">
+  	select u.*,r.roleName as roleName from user u,role r where u.roleId = r.id
+  		<if test="roleId != null">
+  			and u.roleId = #{roleId}
+  		</if>
+  		<if test="userCode != null">
+  			and u.userCode like CONCAT ('%',#{userCode},'%')
+  		</if>
+  		<if test="userName != null">
+  			and u.userName like CONCAT ('%',#{userName},'%')
+  		</if>
+  </select>
+  
+<!-- set/if(判断参数) 将实体类不为空的属性更新 -->
+  	<!-- <update id="update" parameterType="User">
+  		update user
+  			<set>
+  				<if test="userCode != null and userCode != ''">
+  					userCode = #{userCode},
+  				</if>
+  				<if test="userName != null and userName != ''">
+  					userName = #{userName},
+  				</if>
+  				<if test="userPassword != null and userPassword != ''">
+  					userPassword = #{userPassword},
+  				</if>
+  				<if test="roleId != null">
+  					roleId = #{roleId}
+  				</if>
+  			</set>
+  			where id = #{id}
+  	</update> -->
+  	
+<!-- trim/if(代替set,判断参数),跟上面的update是一样的 -->
+ 	<update id="update" parameterType="User">
+ 		update user
+ 		<trim prefix="set" suffixOverrides=",">
+ 			<if test="userCode != null and userCode != ''">
+ 				userCode = #{userCode},
+ 			</if>
+ 			<if test="userName != null">
+ 				userName = #{userName},
+ 			</if>
+ 			<if test="userPassword != null">
+ 				userPassword = #{userPassword},
+ 			</if>
+ 			<if test="roleId != null">
+ 				roleId = #{roleId},
+ 			</if>
+ 		</trim>
+ 		where id = #{id}
+ 	</update>
+ 	
+<!-- foreach(循环array参数) -->
+</mapper>
