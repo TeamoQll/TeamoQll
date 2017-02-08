@@ -27,4 +27,6 @@ public interface UserMapper {
 	
 	//动态SQL
 	public List<User> searchUserList(User user);
+	
+	public List<User> getUserByDepId_foreach_array(String[] depIds);
 }

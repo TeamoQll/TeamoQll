@@ -115,4 +115,24 @@ public class UserDaoTestByMapper {
 			MyBatisUtil.closeSqlSession(sqlSession);
 		}
 	}
+	
+	//动态SQL循环测试
+	@Test
+	public void getUserByDepId_foreach_arrayTest(){
+		SqlSession sqlSession = null;
+		List<User> userList = new ArrayList<User>();
+		String[] depIds = {"1","2"};
+		try {
+			sqlSession = MyBatisUtil.createSqlSession();
+			userList = sqlSession.getMapper(UserMapper.class).getUserByDepId_foreach_array(depIds);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}finally{
+			MyBatisUtil.closeSqlSession(sqlSession);
+		}
+		for (User u : userList) {
+			logger.debug("userList=="+u.getUserName()+","+u.getUserCode());
+		}
+	}
 }

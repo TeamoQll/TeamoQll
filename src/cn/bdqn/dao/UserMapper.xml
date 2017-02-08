@@ -111,4 +111,15 @@
  	</update>
  	
 <!-- foreach(循环array参数) -->
+	<resultMap type="User" id="userMapByDep">
+		<result property="id" column="id"/>
+		<result property="userCode" column="userCode"/>
+		<result property="userName" column="userName"/>
+	</resultMap>
+	<select id="getUserByDepId_foreach_array" resultMap="userMapByDep">
+		select * from user where depId in
+			<foreach collection="array" item="depIds" open="(" separator="," close=")">
+				#{depIds}
+			</foreach>
+	</select>
 </mapper>
